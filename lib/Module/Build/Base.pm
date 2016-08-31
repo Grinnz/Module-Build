@@ -4935,6 +4935,15 @@ sub make_tarball {
 
   if ($self->{args}{tar}) {
     my $tar_flags = $self->verbose ? 'cvf' : 'cf';
+    local %ENV = %ENV;
+    if ($^O eq 'darwin') {
+        # See ExtUtils::MM_Darwin
+        # 10.4 wants COPY_EXTENDED_ATTRIBUTES_DISABLE.
+        # 10.5 wants COPYFILE_DISABLE.
+        # So just set both.
+        $ENV{COPY_EXTENDED_ATTRIBUTES_DISABLE} = 1;
+        $ENV{COPYFILE_DISABLE} = 1;
+    }
     $self->do_system($self->split_like_shell($self->{args}{tar}), $tar_flags, "$file.tar", $dir);
     $self->do_system($self->split_like_shell($self->{args}{gzip}), "$file.tar") if $self->{args}{gzip};
   } else {
